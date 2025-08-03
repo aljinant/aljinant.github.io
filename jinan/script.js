@@ -6,18 +6,16 @@ function parseInline(text, basePath){
   return text
     .replace(/!\[(.*?)\]\((.*?)\)/g, (m, alt, src) => {
       if (!src.startsWith("http") && basePath) {
-        // Pastikan path gambar relatif ke file .md
         let folder = basePath;
         if (folder.includes("/")) {
           folder = folder.substring(0, folder.lastIndexOf("/") + 1);
         }
-        src = folder + src;   // 🔥 Akan menjadi kategori/jaringan/jaringan_sekolah/images/user.jpg
+        src = folder + src;   
       }
       return `<img alt="${alt}" src="${src}">`;
     })
     .replace(/`([^`]+)`/g, '<code>$1</code>');
 }
-
 
 function mdToHtml(md, basePath){
   const lines = md.split("\n");
@@ -72,21 +70,62 @@ function mdToHtml(md, basePath){
   return html;
 }
 
+// 🔥 GLOBAL
+let allFiles = [];
+
+// 🔥 Load daftar file
 async function loadFileList() {
   try {
     const res = await fetch("files.json");
     const data = await res.json();
-    const select = document.getElementById("fileSelect");
-    select.innerHTML = data.files.map(f => `<option value="${f}">${f}</option>`).join("");
-    loadMarkdown(data.files[0]);
+    allFiles = data.files;
+    populateCategoryTabs();
+    renderFileList("all");
   } catch (e) {
     document.getElementById("preview").innerHTML = "<h3>Cannot load files.json</h3>";
   }
 }
 
+// 🔥 Render daftar file sesuai kategori
+function renderFileList(filter){
+  const select = document.getElementById("fileSelect");
+  const filtered = allFiles.filter(f=>{
+    if(filter==="all") return true;
+    return f.includes("/"+filter+"/");
+  });
+
+  select.innerHTML = filtered.map(f => `<option value="${f}">${f}</option>`).join("");
+
+  if(filtered.length>0){
+    loadMarkdown(filtered[0]);
+  } else {
+    document.getElementById("preview").innerHTML = "<h3>Tidak ada file</h3>";
+  }
+}
+
+// 🔥 Buat tab kategori
+function populateCategoryTabs(){
+  const tabs = document.getElementById("categoryTabs");
+  const categories = ["all","web","jaringan","cse"];
+
+  tabs.innerHTML = categories.map(cat=>{
+    let label = cat==="all"?"Semua":cat.charAt(0).toUpperCase()+cat.slice(1);
+    return `<li data-filter="${cat}" class="${cat==="all"?"active":""}">${label}</li>`;
+  }).join("");
+
+  document.querySelectorAll("#categoryTabs li").forEach(tab=>{
+    tab.addEventListener("click", ()=>{
+      document.querySelectorAll("#categoryTabs li").forEach(t=>t.classList.remove("active"));
+      tab.classList.add("active");
+      renderFileList(tab.dataset.filter);
+    });
+  });
+}
+
+// 🔥 Load Markdown
 async function loadMarkdown(path) {
   try {
-    const res = await fetch(encodeURI(path)); // 🔥 encode untuk spasi
+    const res = await fetch(encodeURI(path));
     if (!res.ok) {
       document.getElementById("preview").innerHTML = `<h3>404 File Not Found</h3>`;
       return;
@@ -98,6 +137,7 @@ async function loadMarkdown(path) {
   }
 }
 
+// 🔥 Event select file
 document.getElementById("fileSelect").addEventListener("change", e => {
   loadMarkdown(e.target.value);
 });
