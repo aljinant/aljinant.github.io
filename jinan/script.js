@@ -6,17 +6,18 @@ function parseInline(text, basePath){
   return text
     .replace(/!\[(.*?)\]\((.*?)\)/g, (m, alt, src) => {
       if (!src.startsWith("http") && basePath) {
-        // 🔥 Hitung folder berdasarkan path file .md yang sedang dibuka
+        // Pastikan path gambar relatif ke file .md
         let folder = basePath;
         if (folder.includes("/")) {
           folder = folder.substring(0, folder.lastIndexOf("/") + 1);
         }
-        src = folder + src;
+        src = folder + src;   // 🔥 Akan menjadi kategori/jaringan/jaringan_sekolah/images/user.jpg
       }
       return `<img alt="${alt}" src="${src}">`;
     })
     .replace(/`([^`]+)`/g, '<code>$1</code>');
 }
+
 
 function mdToHtml(md, basePath){
   const lines = md.split("\n");
