@@ -34,7 +34,6 @@ function mdToHtml(md, basePath){
   function parseInline(text){
     return text
       .replace(/!\[(.*?)\]\((.*?)\)/g, (m, alt, src) => {
-        // Pastikan gambar relatif ke folder file .md
         if (!src.startsWith("http") && basePath) {
           const folder = basePath.substring(0, basePath.lastIndexOf("/") + 1);
           src = folder + src;
@@ -92,17 +91,29 @@ function mdToHtml(md, basePath){
 }
 
 async function loadFileList() {
-  const res = await fetch("files.json");
-  const data = await res.json();
-  const select = document.getElementById("fileSelect");
-  select.innerHTML = data.files.map(f => `<option value="${f}">${f}</option>`).join("");
-  loadMarkdown(data.files[0]); // load file pertama
+  try {
+    const res = await fetch("files.json");
+    const data = await res.json();
+    const select = document.getElementById("fileSelect");
+    select.innerHTML = data.files.map(f => `<option value="${f}">${f}</option>`).join("");
+    loadMarkdown(data.files[0]);
+  } catch (e) {
+    document.getElementById("preview").innerHTML = "<h3>Cannot load files.json</h3>";
+  }
 }
 
 async function loadMarkdown(path) {
-  const res = await fetch(path);
-  const text = await res.text();
-  document.getElementById("preview").innerHTML = mdToHtml(text, path);
+  try {
+    const res = await fetch(encodeURI(path)); // FIX: support spasi
+    if (!res.ok) {
+      document.getElementById("preview").innerHTML = `<h3>404 File Not Found</h3>`;
+      return;
+    }
+    const text = await res.text();
+    document.getElementById("preview").innerHTML = mdToHtml(text, path);
+  } catch (e) {
+    document.getElementById("preview").innerHTML = "<h3>Failed to load file</h3>";
+  }
 }
 
 document.getElementById("fileSelect").addEventListener("change", e => {
