@@ -80,18 +80,15 @@ async function loadFileList() {
 }
 
 async function loadMarkdown(path) {
-  try {
-    const res = await fetch(encodeURI(path)); // FIX: support spasi
-    if (!res.ok) {
-      document.getElementById("preview").innerHTML = `<h3>404 File Not Found</h3>`;
-      return;
-    }
-    const text = await res.text();
-    document.getElementById("preview").innerHTML = mdToHtml(text, path);
-  } catch (e) {
-    document.getElementById("preview").innerHTML = "<h3>Failed to load file</h3>";
+  const res = await fetch(encodeURI(path)); // tanpa prefix jinan/
+  if (!res.ok) {
+    document.getElementById("preview").innerHTML = `<h3>404 File Not Found</h3>`;
+    return;
   }
+  const text = await res.text();
+  document.getElementById("preview").innerHTML = mdToHtml(text, path);
 }
+
 
 document.getElementById("fileSelect").addEventListener("change", e => {
   loadMarkdown(e.target.value);
