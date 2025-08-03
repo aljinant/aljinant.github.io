@@ -7,7 +7,10 @@ function parseInline(text, basePath){
     .replace(/!\[(.*?)\]\((.*?)\)/g, (m, alt, src) => {
       // Tambahkan folder path dari file .md agar gambar relatif bekerja
       if (!src.startsWith("http") && basePath) {
-        const folder = basePath.substring(0, basePath.lastIndexOf("/") + 1);
+        let folder = basePath;
+        if (folder.includes("/")) {
+          folder = folder.substring(0, folder.lastIndexOf("/") + 1);
+        }
         src = folder + src;
       }
       return `<img alt="${alt}" src="${src}">`;
