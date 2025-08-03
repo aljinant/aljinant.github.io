@@ -13,7 +13,7 @@ h1 {
   display: flex;
   gap: 10px;
   padding: 0;
-  margin: 0 0 20px 0;
+  margin: 0 0 10px 0;
 }
 #categoryTabs li {
   cursor: pointer;
@@ -29,10 +29,27 @@ h1 {
   color: #000;
   font-weight: bold;
 }
-#fileSelect {
+
+#searchBox {
   width: 100%;
-  margin-bottom: 20px;
   padding: 5px;
+  margin-bottom: 10px;
+}
+#fileList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+}
+#fileList li {
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  background: #222;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: 0.2s;
+}
+#fileList li:hover {
+  background: #333;
 }
 #preview {
   background: #f5f5f5;
@@ -40,13 +57,13 @@ h1 {
   padding: 15px;
   border-radius: 5px;
   min-height: 200px;
+  display: none;
 }
+
 ul {
   padding-left: 20px;
 }
-li {
-  margin-bottom: 5px;
-}
+
 code {
   background: #eee;
   padding: 2px 4px;

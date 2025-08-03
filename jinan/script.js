@@ -10,7 +10,7 @@ function parseInline(text, basePath){
         if (folder.includes("/")) {
           folder = folder.substring(0, folder.lastIndexOf("/") + 1);
         }
-        src = folder + src;   
+        src = folder + src;
       }
       return `<img alt="${alt}" src="${src}">`;
     })
@@ -72,35 +72,39 @@ function mdToHtml(md, basePath){
 
 // 🔥 GLOBAL
 let allFiles = [];
+let currentCategory = "all";
 
 // 🔥 Load daftar file
 async function loadFileList() {
   try {
     const res = await fetch("files.json");
     const data = await res.json();
-    allFiles = data.files;
+    allFiles = data.files.sort(); // urut abjad
     populateCategoryTabs();
-    renderFileList("all");
+    renderFileList();
   } catch (e) {
     document.getElementById("preview").innerHTML = "<h3>Cannot load files.json</h3>";
   }
 }
 
-// 🔥 Render daftar file sesuai kategori
-function renderFileList(filter){
-  const select = document.getElementById("fileSelect");
+// 🔥 Render file sesuai kategori + search
+function renderFileList(){
+  const list = document.getElementById("fileList");
+  list.innerHTML = "";
+  const keyword = document.getElementById("searchBox").value.toLowerCase();
+
   const filtered = allFiles.filter(f=>{
-    if(filter==="all") return true;
-    return f.includes("/"+filter+"/");
+    if(currentCategory !== "all" && !f.includes("/"+currentCategory+"/")) return false;
+    if(keyword && !f.toLowerCase().includes(keyword)) return false;
+    return true;
   });
 
-  select.innerHTML = filtered.map(f => `<option value="${f}">${f}</option>`).join("");
-
-  if(filtered.length>0){
-    loadMarkdown(filtered[0]);
-  } else {
-    document.getElementById("preview").innerHTML = "<h3>Tidak ada file</h3>";
-  }
+  filtered.forEach(file=>{
+    const li = document.createElement("li");
+    li.textContent = file;
+    li.addEventListener("click", ()=>loadMarkdown(file));
+    list.appendChild(li);
+  });
 }
 
 // 🔥 Buat tab kategori
@@ -117,29 +121,31 @@ function populateCategoryTabs(){
     tab.addEventListener("click", ()=>{
       document.querySelectorAll("#categoryTabs li").forEach(t=>t.classList.remove("active"));
       tab.classList.add("active");
-      renderFileList(tab.dataset.filter);
+      currentCategory = tab.dataset.filter;
+      renderFileList();
     });
   });
 }
 
-// 🔥 Load Markdown
+// 🔥 Load Markdown (preview muncul hanya setelah klik file)
 async function loadMarkdown(path) {
   try {
     const res = await fetch(encodeURI(path));
     if (!res.ok) {
       document.getElementById("preview").innerHTML = `<h3>404 File Not Found</h3>`;
+      document.getElementById("preview").style.display = "block";
       return;
     }
     const text = await res.text();
     document.getElementById("preview").innerHTML = mdToHtml(text, path);
+    document.getElementById("preview").style.display = "block";
   } catch (e) {
     document.getElementById("preview").innerHTML = "<h3>Failed to load file</h3>";
+    document.getElementById("preview").style.display = "block";
   }
 }
 
-// 🔥 Event select file
-document.getElementById("fileSelect").addEventListener("change", e => {
-  loadMarkdown(e.target.value);
-});
+// 🔥 Event search
+document.getElementById("searchBox").addEventListener("input", renderFileList);
 
 loadFileList();
