@@ -70,24 +70,23 @@ function mdToHtml(md, basePath){
   return html;
 }
 
-// 🔥 GLOBAL
 let allFiles = [];
 let currentCategory = "all";
 
-// 🔥 Load daftar file
+// Load daftar file
 async function loadFileList() {
   try {
     const res = await fetch("files.json");
     const data = await res.json();
-    allFiles = data.files.sort(); // urut abjad
+    allFiles = data.files.sort();
     populateCategoryTabs();
     renderFileList();
   } catch (e) {
-    document.getElementById("preview").innerHTML = "<h3>Cannot load files.json</h3>";
+    console.error(e);
   }
 }
 
-// 🔥 Render file sesuai kategori + search
+// Render file list sesuai kategori + search
 function renderFileList(){
   const list = document.getElementById("fileList");
   list.innerHTML = "";
@@ -107,7 +106,7 @@ function renderFileList(){
   });
 }
 
-// 🔥 Buat tab kategori
+// Buat tab kategori
 function populateCategoryTabs(){
   const tabs = document.getElementById("categoryTabs");
   const categories = ["all","web","jaringan","cse"];
@@ -127,25 +126,33 @@ function populateCategoryTabs(){
   });
 }
 
-// 🔥 Load Markdown (preview muncul hanya setelah klik file)
+// Load Markdown ke dalam lightbox
 async function loadMarkdown(path) {
   try {
     const res = await fetch(encodeURI(path));
     if (!res.ok) {
       document.getElementById("preview").innerHTML = `<h3>404 File Not Found</h3>`;
-      document.getElementById("preview").style.display = "block";
-      return;
+    } else {
+      const text = await res.text();
+      document.getElementById("preview").innerHTML = mdToHtml(text, path);
     }
-    const text = await res.text();
-    document.getElementById("preview").innerHTML = mdToHtml(text, path);
-    document.getElementById("preview").style.display = "block";
+    document.getElementById("lightboxOverlay").style.display = "flex";
   } catch (e) {
     document.getElementById("preview").innerHTML = "<h3>Failed to load file</h3>";
-    document.getElementById("preview").style.display = "block";
+    document.getElementById("lightboxOverlay").style.display = "flex";
   }
 }
 
-// 🔥 Event search
+// Close lightbox
+document.getElementById("closeBtn").addEventListener("click", ()=>{
+  document.getElementById("lightboxOverlay").style.display = "none";
+});
+document.getElementById("lightboxOverlay").addEventListener("click", (e)=>{
+  if(e.target.id==="lightboxOverlay"){
+    document.getElementById("lightboxOverlay").style.display = "none";
+  }
+});
+
 document.getElementById("searchBox").addEventListener("input", renderFileList);
 
 loadFileList();

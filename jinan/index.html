@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Markdown Preview dengan Kategori & Search</title>
+  <title>Markdown Preview Lightbox</title>
   <link rel="stylesheet" href="styles/styles.css" />
 </head>
 <body>
@@ -18,9 +18,15 @@
   <!-- File list -->
   <ul id="fileList"></ul>
 
-  <!-- Preview konten -->
-  <div id="preview"></div>
+  <!-- Lightbox -->
+  <div id="lightboxOverlay">
+    <div id="lightboxContent">
+      <button id="closeBtn">×</button>
+      <div id="preview"></div>
+    </div>
+  </div>
 
   <script src="script.js"></script>
+
 </body>
 </html>
