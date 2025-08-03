@@ -5,8 +5,8 @@ function escapeHtml(text){
 function parseInline(text, basePath){
   return text
     .replace(/!\[(.*?)\]\((.*?)\)/g, (m, alt, src) => {
-      // Tambahkan folder path dari file .md agar gambar relatif bekerja
       if (!src.startsWith("http") && basePath) {
+        // 🔥 Hitung folder berdasarkan path file .md yang sedang dibuka
         let folder = basePath;
         if (folder.includes("/")) {
           folder = folder.substring(0, folder.lastIndexOf("/") + 1);
@@ -32,12 +32,10 @@ function mdToHtml(md, basePath){
     }
     if (inCode) { html += escapeHtml(line)+"\n"; continue; }
 
-    // Heading
     if (/^### /.test(line)) { html += "<h3>"+line.slice(4)+"</h3>"; continue; }
     if (/^## /.test(line)) { html += "<h2>"+line.slice(3)+"</h2>"; continue; }
     if (/^# /.test(line)) { html += "<h1>"+line.slice(2)+"</h1>"; continue; }
 
-    // List dengan indentasi
     const match = line.match(/^(\s*)- (.*)/);
     if (match) {
       const indent = match[1].length;
@@ -87,7 +85,7 @@ async function loadFileList() {
 
 async function loadMarkdown(path) {
   try {
-    const res = await fetch(encodeURI(path)); // 🔥 Support nama folder dengan spasi
+    const res = await fetch(encodeURI(path)); // 🔥 encode untuk spasi
     if (!res.ok) {
       document.getElementById("preview").innerHTML = `<h3>404 File Not Found</h3>`;
       return;
