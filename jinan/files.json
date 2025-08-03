@@ -1,10 +1,7 @@
 {
   "files": [
-    "jaringan/jaringan_sekolah/test1.md",
-    "jaringan/jaringan_sekolah_2/test1.md",
-    "md/test2.md",
-    "md/web_sekolah/test1.md",
-    "web/web_sekolah/test1.md",
-    "web/web_sekolah_2/test1.md"
+    "jaringan/jaringan_sekolah/jaringan.md",
+    "web/web_sekolah/web.md",
+    "cse/cse/cse.md"  
   ]
 }
