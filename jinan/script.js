@@ -2,23 +2,24 @@ function escapeHtml(text){
   return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
+function parseInline(text, basePath){
+  return text
+    .replace(/!\[(.*?)\]\((.*?)\)/g, (m, alt, src) => {
+      // Tambahkan folder path dari file .md agar gambar relatif bekerja
+      if (!src.startsWith("http") && basePath) {
+        const folder = basePath.substring(0, basePath.lastIndexOf("/") + 1);
+        src = folder + src;
+      }
+      return `<img alt="${alt}" src="${src}">`;
+    })
+    .replace(/`([^`]+)`/g, '<code>$1</code>');
+}
+
 function mdToHtml(md, basePath){
   const lines = md.split("\n");
   let html = "";
   let stack = [];
   let inCode = false;
-
-  function parseInline(text){
-    return text
-      .replace(/!\[(.*?)\]\((.*?)\)/g, (m, alt, src) => {
-        if (!src.startsWith("http") && basePath) {
-          const folder = basePath.substring(0, basePath.lastIndexOf("/") + 1);
-          src = folder + src;
-        }
-        return `<img alt="${alt}" src="${src}">`;
-      })
-      .replace(/`([^`]+)`/g, '<code>$1</code>');
-  }
 
   for (let line of lines) {
     if (/^```/.test(line)) {
@@ -28,14 +29,16 @@ function mdToHtml(md, basePath){
     }
     if (inCode) { html += escapeHtml(line)+"\n"; continue; }
 
+    // Heading
     if (/^### /.test(line)) { html += "<h3>"+line.slice(4)+"</h3>"; continue; }
     if (/^## /.test(line)) { html += "<h2>"+line.slice(3)+"</h2>"; continue; }
     if (/^# /.test(line)) { html += "<h1>"+line.slice(2)+"</h1>"; continue; }
 
+    // List dengan indentasi
     const match = line.match(/^(\s*)- (.*)/);
     if (match) {
       const indent = match[1].length;
-      const content = parseInline(match[2]);
+      const content = parseInline(match[2], basePath);
 
       if (!stack.length || indent > stack[stack.length-1]) {
         html += "<ul>";
@@ -48,14 +51,14 @@ function mdToHtml(md, basePath){
       html += "<li>"+content+"</li>";
     }
     else if (/^\s+/.test(line) && stack.length) {
-      html = html.replace(/<\/li>$/, "<br>"+parseInline(line.trim())+"</li>");
+      html = html.replace(/<\/li>$/, "<br>"+parseInline(line.trim(), basePath)+"</li>");
     }
     else {
       while (stack.length) {
         html += "</ul>";
         stack.pop();
       }
-      if (line.trim()!=="") html += "<p>"+parseInline(line)+"</p>";
+      if (line.trim()!=="") html += "<p>"+parseInline(line, basePath)+"</p>";
     }
   }
 
@@ -80,15 +83,18 @@ async function loadFileList() {
 }
 
 async function loadMarkdown(path) {
-  const res = await fetch(encodeURI(path)); // tanpa prefix jinan/
-  if (!res.ok) {
-    document.getElementById("preview").innerHTML = `<h3>404 File Not Found</h3>`;
-    return;
+  try {
+    const res = await fetch(encodeURI(path)); // 🔥 Support nama folder dengan spasi
+    if (!res.ok) {
+      document.getElementById("preview").innerHTML = `<h3>404 File Not Found</h3>`;
+      return;
+    }
+    const text = await res.text();
+    document.getElementById("preview").innerHTML = mdToHtml(text, path);
+  } catch (e) {
+    document.getElementById("preview").innerHTML = "<h3>Failed to load file</h3>";
   }
-  const text = await res.text();
-  document.getElementById("preview").innerHTML = mdToHtml(text, path);
 }
-
 
 document.getElementById("fileSelect").addEventListener("change", e => {
   loadMarkdown(e.target.value);
