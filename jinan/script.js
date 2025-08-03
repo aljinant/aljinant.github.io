@@ -86,7 +86,7 @@ async function loadFileList() {
   }
 }
 
-// Render file list sesuai kategori + search
+// Render file list (nama file saja)
 function renderFileList(){
   const list = document.getElementById("fileList");
   list.innerHTML = "";
@@ -100,7 +100,8 @@ function renderFileList(){
 
   filtered.forEach(file=>{
     const li = document.createElement("li");
-    li.textContent = file;
+    const fileName = file.split("/").pop(); // hanya ambil nama file
+    li.textContent = fileName;
     li.addEventListener("click", ()=>loadMarkdown(file));
     list.appendChild(li);
   });
